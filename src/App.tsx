@@ -1,26 +1,40 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, {useEffect, useState} from 'react';
+import MapPage, {GraphResult, MapPageProps} from "./pages/MapPage";
+import axiosInstance from "./api/axiosConfig";
+
+type GraphResponse = {
+    name: string,
+    lat: number,
+    lng: number,
+}
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+
+    const [ result, setResult ] = useState<MapPageProps>();
+
+    useEffect(() => {
+        axiosInstance.get<GraphResponse[]>('/graph/').then((response) => {
+            const graphData = response.data;
+            const namedData = graphData.map((item) => {
+                return {
+                    lat: item.lat,
+                    lng: item.lng,
+                }
+            });
+
+            const mapPageData: MapPageProps = {
+                markers: namedData
+            };
+
+            setResult(mapPageData);
+        });
+    }, []);
+
+    return (
+        <MapPage markers={
+            result?.markers || []
+        }/>
+    );
 }
 
 export default App;
