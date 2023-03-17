@@ -18,6 +18,9 @@ const MapPage: React.FC<MapPageProps> = ({markers}) => {
     const [lat, setLat] = useState<number>(0);
     const [lng, setLng] = useState<number>(0);
 
+    const [map, setMap] = useState(null);
+    const [polyline, setPolyline] = useState(null);
+
     useEffect(() => {
         async function getLocation() {
             try {
@@ -25,20 +28,16 @@ const MapPage: React.FC<MapPageProps> = ({markers}) => {
                     if (!navigator.geolocation) {
                         reject(new Error('Geolocation is not supported.'));
                     }
-
                     navigator.geolocation.getCurrentPosition(resolve, reject);
                 });
-
                 const {latitude, longitude} = position.coords;
                 console.log(latitude, longitude)
                 setLat(latitude);
                 setLng(longitude);
-
             } catch (error) {
                 console.error(error);
             }
         }
-
         getLocation().then(r => console.log(r));
     }, []);
 
@@ -63,6 +62,15 @@ const MapPage: React.FC<MapPageProps> = ({markers}) => {
                     {markers.map((marker, index) => (
                         <Marker key={index} position={{ lat: marker.lat, lng: marker.lng }} />
                     ))}
+                    {markers.length > 1 && (
+                        <Polyline
+                            path={markers.map((marker) => ({ lat: marker.lat, lng: marker.lng }))}
+                            options={{
+                                strokeColor: "#FF0022", // Define a cor da linha aqui
+                                strokeWeight: 2 // Define a espessura da linha aqui
+                            }}
+                        />
+                    )}
                 </GoogleMap>
             ) : <></>
         }
